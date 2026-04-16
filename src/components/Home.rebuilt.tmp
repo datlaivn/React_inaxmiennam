@@ -1,0 +1,239 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { initAllCarousels } from "../utils/owlCarousel";
+
+export default function Home() {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://localhost:8888";
+  const [banners, setBanners] = useState([]);
+  const [flashsaleItems, setFlashsaleItems] = useState([]);
+
+  useEffect(() => {
+    const cleanup = initAllCarousels(".owl-carousel");
+    return cleanup;
+  }, []);
+
+  useEffect(() => {
+    if (!banners.length) return undefined;
+
+    const timer = setTimeout(() => {
+      initAllCarousels(".slide-home.owl-carousel");
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [banners]);
+
+  useEffect(() => {
+    if (!flashsaleItems.length) return undefined;
+
+    const timer = setTimeout(() => {
+      initAllCarousels(".slider-flashsale.owl-carousel");
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [flashsaleItems]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    axios
+      .get(`${baseUrl}/get/banner`)
+      .then((response) => {
+        if (isMounted) {
+          setBanners(Array.isArray(response?.data) ? response.data : []);
+        }
+      })
+      .catch((error) => {
+        console.error("Banner API error:", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [baseUrl]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    axios
+      .get(`${baseUrl}/get/flashsale`)
+      .then((response) => {
+        if (isMounted) {
+          setFlashsaleItems(Array.isArray(response?.data) ? response.data : []);
+        }
+      })
+      .catch((error) => {
+        console.error("Flashsale API error:", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [baseUrl]);
+
+  return (
+    <>
+      <section>
+        <div className="slide-home owl-carousel owl-theme owl-loaded owl-drag">
+          <div className="owl-stage-outer">
+            <div
+              className="owl-stage"
+              style={{
+                transform: "translate3d(0px, 0px, 0px)",
+                transition: "0.25s",
+                width: `${Math.max(banners.length, 1) * 1465}px`,
+              }}
+            >
+              {banners.map((banner, index) => (
+                <div
+                  className={`owl-item ${index === 0 ? "active" : ""}`.trim()}
+                  style={{ width: "1455px", marginRight: "10px" }}
+                  key={banner.id}
+                >
+                  <a
+                    aria-label={banner.title || "slide"}
+                    data-cate={0}
+                    data-place={1733}
+                    href="#"
+                  >
+                    <img
+                      width={1920}
+                      height={400}
+                      loading="lazy"
+                      className="owl-lazy ls-is-cached lazyloaded"
+                      data-src={banner.image}
+                      alt={banner.title}
+                      src={banner.image}
+                      style={{ opacity: 1 }}
+                    />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="owl-nav">
+            <button type="button" role="presentation" className="owl-prev">
+              <span aria-label="Previous">‹</span>
+            </button>
+            <button type="button" role="presentation" className="owl-next disabled">
+              <span aria-label="Next">›</span>
+            </button>
+          </div>
+          <div className="owl-dots">
+            {banners.map((banner, index) => (
+              <button
+                role="button"
+                className={`owl-dot ${index === 0 ? "active" : ""}`.trim()}
+                key={`banner-dot-${banner.id}`}
+              >
+                <span />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="main">
+          <div className=" flashsale-block    " id="flashsale">
+            <div className="stage-two">
+              <div className="load" />
+            </div>
+            <div className="flex-fs">
+              <div className="gvdshock">
+                <h3>
+                  <i className="lightning-ic">
+                    <img
+                      width={32}
+                      height={70}
+                      src="https://cdnv2.tgdd.vn/webmwg/2024/tz/images/icon-fs.png"
+                      alt="lightningicon"
+                    />
+                  </i>
+                </h3>
+                <div
+                  className="endtime"
+                  data-countdown="3/9/2026 11:59:00 PM"
+                  data-begin="3/9/2026 9:00:00 AM"
+                >
+                  <span className="title-end">Kết thúc trong</span>
+                  <span className="countdown-timer">
+                    <label id="hour">10</label>
+                    <label id="minute">12</label>
+                    <label id="second">44</label>
+                  </span>
+                </div>
+              </div>
+              <div className="listing-timeline">
+                <a href="javascript:;" className="active" data-ishappening="true">
+                  <span>Đang diễn ra</span>
+                  <span className="timeline">09:00 - 23:59</span>
+                </a>
+              </div>
+            </div>
+            <div className="box-scroll">
+              <div
+                className="listproduct slider-flashsale owl-carousel owl-loaded owl-drag"
+                data-size={flashsaleItems.length || 36}
+              >
+                <div className="owl-stage-outer">
+                  <div
+                    className="owl-stage"
+                    style={{
+                      transform: "translate3d(0px, 0px, 0px)",
+                      transition: "1.5s",
+                      width: `${Math.max(flashsaleItems.length, 1) * 207}px`,
+                    }}
+                  >
+                    {flashsaleItems.map((product, index) => (
+                      <div
+                        className={`owl-item ${index === 0 ? "active" : ""}`.trim()}
+                        style={{ width: "196.667px" }}
+                        key={product.id}
+                      >
+                        <div className="item" data-id={product.id} data-pos={index}>
+                          <a
+                            href={product.url || "#"}
+                            className="remain_quantity main-contain"
+                            data-name={product.name}
+                            data-id={product.id}
+                          >
+                            <div className="item-img">
+                              <img
+                                data-src={product.image}
+                                className="lazyload"
+                                alt={product.name}
+                                width={207}
+                                height={207}
+                                src={product.image}
+                              />
+                            </div>
+                            <h3>{product.name}</h3>
+                            <strong className="price">
+                              {product.sale_price || product.price}
+                              <span className="price-and-discount">
+                                <label className="price-old black">
+                                  {product.regular_price}
+                                </label>
+                              </span>
+                            </strong>
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="owl-nav">
+                  <button type="button" role="presentation" className="owl-prev">
+                    <span aria-label="Previous">‹</span>
+                  </button>
+                  <button type="button" role="presentation" className="owl-next">
+                    <span aria-label="Next">›</span>
+                  </button>
+                </div>
+                <div className="owl-dots disabled" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
